@@ -1,0 +1,116 @@
+// #region ══════════════════════════════════════════════════════════════════════════════════════════════════════
+export class StreamRelay {
+    ss;
+    k;
+    sl;
+    ms;
+    rt;
+    maxSubscribers;
+    bufferSize;
+    strategy;
+    subs = new Set();
+    buffer = [];
+    paused = false;
+    ingesting = false;
+    unsub;
+    errorHandler;
+    constructor(ss, k, sl, ms, rt, opts = {}) {
+        this.ss = ss;
+        this.k = k;
+        this.sl = sl;
+        this.ms = ms;
+        this.rt = rt;
+        this.maxSubscribers = opts.maxSubscribers ?? 32;
+        this.bufferSize = opts.bufferSize ?? 512;
+        this.strategy = opts.backpressureStrategy ?? "pause";
+    }
+    onError(cb) { this.errorHandler = cb; }
+    subscribe(fn) {
+        if (this.subs.size >= this.maxSubscribers) {
+            throw new Error(`streamRelay ${this.rt}: max subscribers (${this.maxSubscribers})`);
+        }
+        this.subs.add(fn);
+        if (!this.unsub) {
+            this.unsub = this.ss.sub((data) => { this.ingest(data); }, this.k, this.sl, this.ms, this.rt);
+        }
+        return () => {
+            this.subs.delete(fn);
+            if (this.subs.size === 0 && this.unsub) {
+                this.unsub();
+                this.unsub = undefined;
+            }
+        };
+    }
+    ingest(data) {
+        if (this.paused || this.ingesting) {
+            this.buffer.push(data);
+            if (this.buffer.length > this.bufferSize)
+                this.applyBackpressure();
+            return;
+        }
+        this.ingesting = true;
+        try {
+            for (const fn of [...this.subs]) {
+                try {
+                    fn(data);
+                }
+                catch (err) {
+                    this.handleError(err);
+                }
+            }
+        }
+        finally {
+            this.ingesting = false;
+            this.drain();
+        }
+    }
+    pause() { this.paused = true; }
+    resume() {
+        this.paused = false;
+        this.drain();
+    }
+    drain() {
+        if (this.paused || this.ingesting || this.buffer.length === 0)
+            return;
+        this.ingesting = true;
+        try {
+            const atOnce = this.buffer;
+            this.buffer = [];
+            for (const data of atOnce) {
+                for (const fn of [...this.subs]) {
+                    try {
+                        fn(data);
+                    }
+                    catch (err) {
+                        this.handleError(err);
+                    }
+                }
+            }
+        }
+        finally {
+            this.ingesting = false;
+        }
+        if (this.buffer.length > 0)
+            this.drain();
+    }
+    applyBackpressure() {
+        if (this.strategy === "pause")
+            this.paused = true;
+        else if (this.strategy === "drop")
+            this.buffer.shift();
+        else if (this.strategy === "error") {
+            const err = new Error(`streamRelay ${this.rt}: buffer overflow`);
+            if (this.errorHandler)
+                this.errorHandler(err);
+            else
+                reportError(err);
+        }
+    }
+    handleError(err) { if (this.errorHandler)
+        this.errorHandler(err);
+    else
+        reportError(err); }
+    bufferedCount() { return this.buffer.length; }
+    subscriberCount() { return this.subs.size; }
+}
+// #endregion
