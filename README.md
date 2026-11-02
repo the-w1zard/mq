@@ -2,7 +2,7 @@
 <div align="left" style="position: relative;">
 <img src="./icons/gandalf.png" align="right" width="30%" style="margin: -20px 0 0 20px;">
 
-<h1>Message Queues & Disruptors: <span style="font-size:18px;" >The Wizard's Arsenal</span></h1>
+<h3>Message Queues & Disruptors: <span style="font-size:18px;" >The Wizard's Arsenal</span></h3>
 
 <p align="left"><em>Because CLEARLY... fuck, you can never just have TOO many disruptors.</em></p>
 <p align="left"><em>For example, what happens when... your DISRUPTOR NEEDS... ANOTHER disruptor ontop of it?... just saying, it does happen you know...</em></p>
@@ -62,444 +62,460 @@
 > 
 > The only reason I haven't done it yet, is purely because of the cost in performance in doing so. One high performing disruptor, I wouldn't even bother... because thats just luck... But with the amount I have, as I seem to be collecting an arsenal of them, AND with how they actually push v8 as hard as they do... there is A LOT of performance left on the table to pay for the cost of going to multi core. Not to mention, its fucking front end... LOL... One thing that's curious... everyone else seems to be stuck at that 4 million mark... ** shrugs **
 
-High-performance execution primitives, ring buffers, message queues, stream relays, and event transport infrastructure.
 
-This module provides a collection of specialized messaging and execution mechanisms designed to minimize operational overhead, reduce memory allocation, and maximize throughput.
+---
 
-Rather than forcing every workload through a single queue implementation, it provides multiple execution strategies suited to different requirements: direct ring-buffer publication, batch consumption, individual polling, stream delivery, and server-sent event transport.
+A collection of high-performance execution primitives for event processing, message delivery, reactive state, shared-memory coordination, and streaming.
+
+The module brings together several Disruptor implementations, message queues, event emitters, stream relays, and Server-Sent Events infrastructure.
+
+---
 
 ## Core Components
 
-| Component | Description |
+| Component | Purpose |
 |---|---|
-| `THE_POWER_OF_TWO` | Power-of-two ring buffer using preallocated Structure-of-Arrays storage. |
-| `POWER_OF_TWO` | Direct ring-buffer implementation with batch consumption. |
-| `DisruptorSoA` | Structure-of-Arrays Disruptor with individual event polling. |
-| `IS_BETTER_THAN_ONE` | Lightweight interface exposing the `THE_POWER_OF_TWO` publisher and handler. |
-| `StreamRelay` | Multi-subscriber stream relay with buffering and backpressure strategies. |
-| `EMITTER` | Event transport supporting scoped channels, subscriptions, and native Web Streams. |
-| `EMITTER_CHAIN` | Composable message-processing pipeline with operators and delivery targets. |
-| SSE Core | Server-Sent Events infrastructure, including channels, broadcasting, and versioned storage. |
-| SSE Client | EventSource management with channel subscriptions and reconnection handling. |
+| `THE_POWER_OF_TWO` | Power-of-two ring buffer using a structure-of-arrays layout |
+| `IS_BETTER_THAN_ONE` | Lightweight send/subscribe interface over a Disruptor |
+| `DisruptorSoA` | Direct structure-of-arrays event processing |
+| `HADRON_DISRUPTOR` | Phase-locked, multi-producer, multi-lane shared-memory execution engine |
+| `StreamRelay` | Subscriber relay with buffering and backpressure |
+| `EMITTER` | Event emission and subscription |
+| `EMITTER_CHAIN` | Composable event-processing pipeline |
+| SSE infrastructure | Server-Sent Events, broadcasting, versioned state, and client connections |
 
 ---
 
 ## Disruptor Implementations
 
-### THE_POWER_OF_TWO
+### `THE_POWER_OF_TWO`
 
-A preallocated, power-of-two ring buffer optimized for direct event publication and batch processing.
+A power-of-two ring buffer built around preallocated typed-array storage.
 
-**Storage architecture: Structure of Arrays (SoA)**
+The structure-of-arrays design keeps event data in separate numeric lanes rather than allocating an object for every event.
 
-Three independent typed-array lanes hold event data:
+Core storage:
 
-- `pids`: `Int32Array` — event identifiers.
-- `values`: `Float64Array` — numeric payloads.
-- `flags`: `Uint8Array` — event flags.
+- `pids`: `Int32Array`
+- `values`: `Float64Array`
+- `flags`: `Uint8Array`
 
-The implementation maintains independent write and read cursors.
+Supports publishing, batch handling, and reset operations.
 
-**Characteristics:**
+### `POWER_OF_TWO`
 
-- Preallocated typed-array storage.
-- Power-of-two capacity enforcement.
-- Bitwise ring-slot indexing.
-- Constant-time publication.
-- No per-event heap allocation.
-- Batch-oriented consumption.
-- Explicit backpressure through ring-capacity checks.
-- In-place reset without reallocating storage.
+A power-of-two ring buffer with preallocated typed-array storage and batch consumption.
 
-**API:**
+Designed for high-throughput event processing with predictable memory access and minimal allocation.
 
-```ts
-const disruptor = new THE_POWER_OF_TWO(65536);
+### `IS_BETTER_THAN_ONE`
 
-// Publish
-disruptor.publish(pid, value, flag);
+A lightweight interface over `THE_POWER_OF_TWO`, exposing send and subscribe operations without requiring callers to interact directly with the underlying ring implementation.
 
-// Batch consumption
-disruptor.handler((pid, value, flag) => {
-    // Process event
-});
+### `DisruptorSoA`
 
-// Reset
-disruptor.reset();
-```
+A structure-of-arrays Disruptor using typed-array lanes for event data.
 
-`publish()` returns `false` when the ring buffer is full.
-
-### POWER_OF_TWO
-
-A direct ring-buffer implementation sharing the same SoA storage architecture.
-
-Its primary distinction is the consumption interface: `consume()` drains available events in batches and returns the number processed.
-
-```ts
-const disruptor = new POWER_OF_TWO(65536);
-
-disruptor.publish(pid, value, flag);
-
-const processed = disruptor.consume((pid, value, flag) => {
-    // Process event
-});
-```
-
-### DisruptorSoA
-
-A lightweight SoA ring buffer supporting individual event polling.
-
-Unlike batch consumption, `poll()` processes at most one event per invocation.
-
-```ts
-const disruptor = new DisruptorSoA(65536);
-
-disruptor.publish(pid, value, flag);
-
-disruptor.poll((pid, value, flag) => {
-    // Process event
-});
-```
-
-Returns `false` when no event is available and `true` when an event is consumed.
-
-### IS_BETTER_THAN_ONE
-
-A lightweight access interface around `THE_POWER_OF_TWO`.
-
-Exposes publisher and subscriber accessors without requiring callers to interact directly with the underlying implementation.
+The implementation separates identifiers, numeric values, and flags, allowing direct access to event data without constructing per-event objects.
 
 ---
 
-## Stream Infrastructure
+## HADRON_DISRUPTOR
 
-### StreamRelay
+<badge color="success">Multi-producer · Phase-locked · Shared-memory</badge>
 
-A multi-subscriber stream relay built around a shared transport subscription.
+A phase-locked, multi-producer, availability-buffered, batch-draining Disruptor.
 
-Multiple local subscribers can consume the same incoming stream without creating separate upstream subscriptions.
+`HADRON_DISRUPTOR` extends the conventional ring-buffer model with per-lane producer sequencing, LMAX-style availability tracking, consumer gating, homogeneous execution phases, and a tracer-particle epoch clock.
 
-**Features:**
+It is designed as a shared-memory execution engine for database and reactive-state workloads.
+
+### Architecture
+
+Each lane has its own:
+
+- Preallocated `Int32Array` ring.
+- Multi-producer claim cursor.
+- Availability buffer.
+- Consumer gating sequence.
+- Batch handler.
+- Publication and consumption statistics.
+
+The engine uses a configurable schedule to execute homogeneous operation phases. The tracer clock advances after a complete schedule revolution.
+
+When a lane reaches capacity, producers encounter structural backpressure. A ring slot cannot be reused until the consumer advances its gating sequence and releases that capacity.
+
+### Fixed-width record layout
+
+Each record occupies eight `Int32` values: 32 bytes.
+
+| Offset | Field | Purpose |
+|---:|---|---|
+| 0 | `opcode` | Operation type |
+| 1 | `pid` | Particle / process identifier |
+| 2 | `slot` | Storage slot |
+| 3 | `a` | Primary payload or arena offset |
+| 4 | `b` | Secondary payload, length, or count |
+| 5 | `c` | Tertiary payload or flags |
+| 6 | `epoch` | Tracer clock at publication |
+| 7 | `reserved` | Checksum or extension |
+
+### Operation types
+
+```ts
+export const OP = {
+  READ: 0,
+  WRITE: 1,
+  DELETE: 2,
+  EFFECT: 3,
+  COMPACT: 4,
+} as const;
+```
+
+The schedule is configurable. The default schedule is:
+
+```ts
+[
+  OP.READ,
+  OP.WRITE,
+  OP.READ,
+  OP.WRITE,
+  OP.DELETE,
+  OP.EFFECT,
+  OP.COMPACT,
+]
+```
+
+This allows operation classes to execute in dedicated phases rather than interleaving unrelated work in one event loop.
+
+### Multi-producer publication
+
+Each producer claims a unique sequence through compare-and-swap.
+
+After writing its record, the producer marks that exact sequence as published in the lane's availability buffer.
+
+Consumers scan availability rather than relying on a single highest-published sequence.
+
+This handles out-of-order producer completion:
+
+```txt
+Producer A claims 10
+Producer B claims 11
+
+Producer B publishes 11
+Producer A publishes 10
+
+Availability:
+10 -> published
+11 -> published
+
+Consumer processes 10 and 11 in sequence.
+```
+
+A later producer can publish without incorrectly making an earlier, unfinished claim visible to the consumer.
+
+### Batch execution
+
+Handlers receive a contiguous sequence range:
+
+```ts
+(
+  ring,
+  from,
+  to,
+  epoch,
+  disruptor
+) => void
+```
+
+This makes the batch boundary the unit of execution rather than invoking a callback for every record.
+
+Handlers can specialize their processing loops around a single operation type.
+
+### Phase-locked execution
+
+A phase drains one scheduled lane and advances the phase index.
+
+A full revolution executes every scheduled phase:
+
+```ts
+d.revolution();
+```
+
+The tracer clock represents completed revolutions rather than individual event publications.
+
+This gives the database execution path an epoch boundary that can be shared across READ, WRITE, DELETE, EFFECT, and COMPACT passes.
+
+### SOA payload arenas
+
+Records remain fixed-width. Larger or differently typed payloads live in separate preallocated arenas:
+
+- `Float64Array`
+- `Uint32Array`
+- `Int32Array`
+- `Uint8Array`
+
+Arena allocation returns numeric offsets that can be stored directly in event records.
+
+```ts
+const valueOffset = d.allocF64(123.456);
+
+d.emit(
+  OP.WRITE,
+  pid,
+  slot,
+  valueOffset,
+  1,
+  0,
+);
+```
+
+A handler retrieves the value directly:
+
+```ts
+const offset = ring[base + F_A];
+const value = d.f64At(offset);
+```
+
+### PID and dirty tracking
+
+The engine includes a direct PID-to-slot table:
+
+```ts
+d.bind(pid, slot);
+
+const slot = d.slot(pid);
+d.unbind(pid);
+```
+
+Dirty tracking uses a `Uint32Array` bitmask:
+
+```ts
+d.dirtyMark(pid);
+
+if (d.dirtyTake(pid)) {
+  // Process invalidation.
+}
+```
+
+This provides constant-time mark, take, and peek operations without a `Map` or per-PID object allocation.
+
+### Example: reactive database write path
+
+```ts
+const d = new HADRON_DISRUPTOR({
+  capacity: 1 << 18,
+  pidCapacity: 1 << 20,
+  f64Capacity: 1 << 20,
+  wait: "spin",
+});
+
+const values = new Float64Array(1 << 20);
+const versions = new Uint32Array(1 << 20);
+
+d.on(OP.WRITE, (ring, from, to, epoch, d) => {
+  for (let seq = from; seq < to; seq++) {
+    const base = (seq & d.mask) * 8;
+
+    const pid = ring[base + 1];
+    const slot = ring[base + 2];
+    const valueOffset = ring[base + 3];
+
+    values[slot] = d.f64At(valueOffset);
+    versions[slot] = epoch;
+
+    d.dirtyMark(pid);
+  }
+});
+
+d.on(OP.READ, (ring, from, to, epoch, d) => {
+  for (let seq = from; seq < to; seq++) {
+    const base = (seq & d.mask) * 8;
+    const pid = ring[base + 1];
+    const slot = d.slot(pid);
+
+    if (slot >= 0 && d.dirtyTake(pid)) {
+      // Reactive invalidation / subscriber dispatch.
+    }
+  }
+});
+
+d.on(OP.COMPACT, (_ring, _from, _to, _epoch, d) => {
+  // Bulk slot reclamation.
+});
+
+const pid = 77;
+const slot = 1234;
+
+d.bind(pid, slot);
+
+const valueAt = d.allocF64(42.5);
+
+d.emit(OP.WRITE, pid, slot, valueAt);
+
+d.revolution();
+
+console.log(d.tick());       // 1
+console.log(values[slot]);   // 42.5
+console.log(versions[slot]); // 1
+```
+
+### Control and observability
+
+The engine exposes:
+
+| Method | Purpose |
+|---|---|
+| `on(op, handler)` | Register an operation handler |
+| `claim(lane)` | Claim a producer sequence |
+| `publish(lane, seq)` | Publish a claimed sequence |
+| `emit(...)` | Write and publish an event |
+| `drainPhase(limit)` | Drain one scheduled phase |
+| `revolution(limit)` | Execute one full schedule |
+| `drainAll(limit)` | Drain until no additional records are consumed |
+| `tick()` | Read the tracer epoch |
+| `currentPhase()` | Read the scheduled operation |
+| `start()` / `stop()` | Update running state |
+| `isRunning()` | Read running state |
+| `stats(lane)` | Read lane statistics |
+| `pending(lane)` | Read pending publication count |
+
+`LANE_STATS` reports claimed, published, consumed, batch count, maximum batch size, and full-stall count.
+
+### Design properties
+
+- Preallocated, fixed-width event records.
+- Per-lane multi-producer sequencing.
+- Availability-buffer publication.
+- Consumer gating and structural backpressure.
+- Batch handlers instead of per-event callbacks.
+- Homogeneous database execution phases.
+- Tracer-particle epoch clock.
+- Direct PID-to-slot lookup.
+- O(1) dirty bitmask operations.
+- Separate typed-array payload arenas.
+- Shared-memory-compatible storage.
+
+The intended execution path is specialized around numeric kernels: READ for scanning and invalidation, WRITE for bulk SOA updates, DELETE for slot reclamation, EFFECT for post-mutation work, and COMPACT for scheduled compaction.
+
+---
+
+## StreamRelay
+
+`StreamRelay<T>` provides a local subscriber relay with buffering and backpressure controls.
+
+Features:
 
 - Multiple subscribers.
-- Shared upstream subscription.
 - Buffered delivery.
 - Pause and resume.
-- Configurable maximum subscriber count.
-- Configurable buffer capacity.
-- Error handling.
 - Reentrancy protection.
-- Backpressure strategies.
-
-**Backpressure strategies:**
-
-| Strategy | Behavior |
-|---|---|
-| `pause` | Pauses delivery when the buffer exceeds its configured capacity. |
-| `drop` | Removes the oldest buffered item. |
-| `error` | Reports a buffer overflow. |
-
-**API:**
-
-```ts
-const relay = new StreamRelay<T>(
-    ss,
-    k,
-    sl,
-    ms,
-    rt,
-    {
-        maxSubscribers: 32,
-        bufferSize: 512,
-        backpressureStrategy: "pause"
-    }
-);
-
-const unsubscribe = relay.subscribe(data => {
-    // Receive data
-});
-
-relay.pause();
-relay.resume();
-
-relay.bufferedCount();
-relay.subscriberCount();
-
-unsubscribe();
-```
-
-An optional error handler can be registered using `onError()`.
-
----
-
-## Event Transport
-
-### EMITTER
-
-A scoped event transport supporting publish/subscribe messaging and native Web Streams.
-
-The emitter maintains nested channel storage across three addressing dimensions:
-
-- `rt` — root.
-- `ms` — master.
-- `sl` — slave.
-
-Each channel is identified by `k`.
-
-The default scopes are:
-
-```ts
-CH_1 = '__THE_WIZARD_EMITTER__'
-CH_2 = '__SAURON__'
-CH_3 = '__STATE__'
-```
-
-**Core API:**
-
-```ts
-// Publish
-emitter.send(data, k, sl, ms, rt).send();
-
-// Subscribe
-const unsubscribe = emitter.sub(k, handler, sl, ms, rt);
-
-// Emit directly
-emitter.emit(k, data, sl, ms, rt);
-
-// Unsubscribe
-emitter.unsub(k, handler, sl, ms, rt);
-```
-
-Additional event management:
-
-- `once()`
-- `subAny()`
-- `subAll()`
-- `removeAllListeners()`
-- `listenerCount()`
-- `eventNames()`
-
-### Native Web Streams
-
-The emitter can expose its transport through standard Web Streams.
-
-| Method | Description |
-|---|---|
-| `readableStream()` | Creates a readable stream from an emitter subscription. |
-| `writableStream()` | Publishes written chunks into the emitter. |
-| `duplexStream()` | Creates independent readable and writable channels. |
-| `transformStream()` | Transforms incoming chunks and forwards the results. |
-
-These interfaces allow emitter transport to participate in native stream pipelines.
-
----
-
-## EMITTER_CHAIN
-
-`EMITTER_CHAIN` provides composable message processing before delivery.
-
-A chain begins with `emitter.send()` and supports operators that transform, filter, aggregate, delay, or inspect messages.
-
-### Operators
-
-| Category | Operators |
-|---|---|
-| Transformation | `map()`, `tap()` |
-| Filtering | `filter()`, `distinct()`, `distinctUntilChanged()` |
-| Aggregation | `reduce()`, `scan()` |
-| Timing | `debounce()`, `throttle()`, `delay()` |
-| Buffering | `buffer()`, `bufferTime()`, `takeLast()` |
-| Selection | `take()`, `skip()` |
-| Error handling | `catchError()`, `retry()`, `logError()` |
-| Diagnostics | `log()` |
-
-### Delivery
-
-Processed messages can be directed to multiple destinations:
-
-- `subscribe()` — local chain subscribers.
-- `send()` — executes the processing chain and emits the result.
-- `next()` — schedules execution through `queueMicrotask()`.
-- `toPromise()` — awaits chain execution.
-- `toDRS()` — writes into a scoped emitter store.
-- `toChannel()` — forwards into another event channel.
-- `persist()` — writes into persistent-scoped emitter storage.
-
-Example:
-
-```ts
-emitter
-    .send(data, 'events')
-    .map(value => transform(value))
-    .filter(value => value !== null)
-    .tap(value => process(value))
-    .subscribe(value => handle(value))
-    .send();
-```
-
----
-
-## Server-Sent Events (SSE)
-
-The SSE infrastructure provides server-side event channels, client-side connection management, broadcasting, and versioned state storage.
-
-### SSE Core
-
-**Channel creation:**
-
-- `createSSEChannel()` — creates a channel using a Node-style response.
-- `createWebSSEChannel()` — creates an SSE channel backed by a native `ReadableStream`.
-
-Both expose a common channel interface:
-
-```ts
-type SSEChannel = {
-    id: string;
-    send: (event: string, data: unknown) => void;
-    close: () => void;
-    status: () => 'connected' | 'disconnected' | 'reconnecting';
-};
-```
-
-### SSEBroadcaster
-
-A shared server-side broadcaster managing connected clients and their channel subscriptions.
-
-Supports:
-
-- Client registration.
-- Client removal.
-- Channel subscription.
-- Channel unsubscription.
-- Channel-specific broadcasting.
-- Global broadcasting.
-- Automatic removal of clients whose send operation fails.
-
-### SSE Store
-
-A lightweight versioned state store supporting:
-
-- `sseSet()`
-- `sseGet()`
-- `sseDelete()`
-- `sseMerge()`
-- `sseReset()`
-- `sseGetAll()`
-- `sseSubscribeStore()`
-
-Entries maintain their value, version, update timestamps, fetch timestamps, pending status, and optional errors.
-
-### SSE Client
-
-The client maintains managed `EventSource` connections and multiplexes subscriptions across channels.
-
-Features include:
-
-- Shared EventSource connections per URL.
-- Multiple channel subscriptions.
-- Automatic reconnection.
-- Exponential, linear, and fixed retry strategies.
-- Configurable retry limits.
-- Local versioned state updates.
-- Initial delivery of existing store values.
-- Connection cleanup when subscriptions are removed.
-
-### Ymir Conflict Resolution
-
-The SSE core also defines configuration for Ymir-style conflict resolution.
+- Upstream subscription integration.
+- Configurable backpressure strategies.
 
 Supported strategies:
 
-- `server-wins`
-- `client-wins`
-- `merge`
-- `version`
-- `custom`
+| Strategy | Behavior |
+|---|---|
+| `pause` | Pause upstream delivery |
+| `drop` | Drop events when the buffer cannot accept more |
+| `error` | Surface a backpressure error |
 
-Configuration supports custom merge functions, version fields, focus-based prefetching, debounce, and retry settings.
-
----
-
-## Performance Design
-
-The Disruptor implementations prioritize minimizing work on the execution path.
-
-Core design principles:
-
-1. **Preallocation:** Allocate ring-buffer storage once rather than allocating objects per event.
-2. **Typed memory:** Use typed arrays for predictable, compact storage.
-3. **SoA layout:** Keep independent event fields in contiguous memory lanes.
-4. **Bitwise indexing:** Use power-of-two capacity and masking instead of modulo operations.
-5. **Batch processing:** Amortize consumption overhead across multiple events.
-6. **Minimal dispatch:** Keep publication and consumption paths direct.
-7. **Explicit backpressure:** Prevent writers from overwriting unread ring-buffer entries.
-
-### Recorded Benchmark
-
-`DisruptorSoA.editDirect`
-
-| Metric | Result |
-|---|---:|
-| Peak throughput | 848.46 million ops/sec |
-| Average throughput | 725.71 million ops/sec |
-
-These are recorded benchmark results for the specific tested workload, not universal throughput guarantees.
-
-Actual throughput depends on event payloads, batch sizes, consumer behavior, runtime optimization, hardware, and contention.
+The relay separates upstream event production from downstream subscriber delivery.
 
 ---
 
-## Benchmarking Infrastructure
+## Event Infrastructure
 
-The module includes two benchmark modes:
+### `EMITTER`
 
-- `BENCH` — reports periodic throughput, peak throughput, average throughput, and CPU utilization.
-- `BARE_METAL_CPU` — minimizes measurement overhead by collecting batch timings and calculating results after execution.
+Event emission and subscription infrastructure.
 
-The benchmark infrastructure supports:
+### `EMITTER_CHAIN`
 
-- Warm-up iterations.
-- Configurable test duration.
-- Configurable batch sizes.
-- Preallocated timing storage.
-- Peak throughput measurement.
-- Average throughput measurement.
-- CPU utilization reporting in the regular benchmark.
+Composable event-processing functionality built around chained event operations.
 
-For high-throughput workloads, benchmarks should run long enough for the JavaScript runtime to reach optimized execution behavior.
+---
 
-Short benchmark runs can produce misleading results.
+## Server-Sent Events
+
+The SSE infrastructure provides server-side event channels, broadcasting, versioned state, and client-side EventSource management.
+
+### SSE Core
+
+Includes:
+
+- SSE types and configuration.
+- `createSSEChannel`
+- `createWebSSEChannel`
+- Broadcaster.
+- Versioned store.
+- Store subscriptions.
+- State operations.
+
+Store operations include:
+
+```ts
+sseSet(...)
+sseGet(...)
+sseDelete(...)
+sseMerge(...)
+sseReset(...)
+sseGetAll(...)
+sseSubscribeStore(...)
+```
+
+### SSE Client
+
+The client manages EventSource connections by URL and tracks channel subscriptions.
+
+Includes:
+
+- EventSource connection management.
+- Multiple channels per URL.
+- Reconnection and retry handling.
+- Ymir mapping and conflict handling.
 
 ---
 
 ## Stream Utilities
 
-The module also includes utilities for interoperability between Node-style streams, Web Streams, and async iterables.
+The module includes utilities for bridging Web Streams, Node streams, async iterables, and strings.
 
-| Function | Description |
+| Utility | Purpose |
 |---|---|
-| `writeReadableStreamToWritable()` | Pipes a Web ReadableStream into a writable destination. |
-| `writeAsyncIterableToWritable()` | Writes an AsyncIterable into a writable destination. |
-| `readableStreamToString()` | Collects a Web ReadableStream and converts it into a string. |
-| `createReadableStreamFromReadable()` | Adapts a Node-style readable source into a Web ReadableStream. |
+| `writeReadableStreamToWritable` | Pipe a readable stream into a writable |
+| `writeAsyncIterableToWritable` | Write an async iterable into a writable |
+| `readableStreamToString` | Collect a readable stream as a string |
+| `createReadableStreamFromReadable` | Adapt a readable into a Web ReadableStream |
+| `StreamPump` | Stream pumping and transfer utility |
 
-These utilities provide stream interoperability without requiring consumers to implement their own adapters.
+---
+
+## Performance
+
+The module includes a benchmark harness using `BENCH` and `BARE_METAL_CPU`.
+
+Recorded benchmark:
+
+| Benchmark | Result |
+|---|---:|
+| `DisruptorSoA.editDirect` peak | 848.46M ops/sec |
+| `DisruptorSoA.editDirect` average | 725.71M ops/sec |
+
+These figures are recorded benchmark results, not universal throughput guarantees. Actual performance depends on workload, runtime, hardware, and execution conditions.
 
 ---
 
 ## Design Philosophy
 
-This module is built around specialized execution primitives rather than a one-size-fits-all messaging abstraction.
+The module is built around a few consistent principles:
 
-The goal is to provide the right mechanism for each workload while keeping the underlying operations as inexpensive as possible.
+1. **Preallocation** — keep recurring work away from allocation-heavy paths.
+2. **Typed storage** — use numeric arrays and fixed layouts for predictable access.
+3. **Batching** — process ranges of events instead of paying per-event dispatch overhead.
+4. **Backpressure** — make capacity and consumer progress part of the execution model.
+5. **Separation of concerns** — keep operation classes, streams, events, and transport infrastructure distinct.
+6. **Composable infrastructure** — provide primitives that can be combined into larger execution systems.
 
-- Ring buffers for high-throughput event processing.
-- Batch consumers for amortized processing.
-- Individual polling for incremental consumption.
-- Stream relays for shared stream delivery.
-- Scoped emitters for event-based communication.
-- Message chains for composable processing.
-- SSE for network-based event delivery.
-
-**The objective is simple: eliminate unnecessary operations, minimize allocation, preserve direct execution, and extract as much throughput as possible from the underlying runtime.**
+The result is a collection of low-level building blocks for high-throughput event processing, reactive state, database execution, and streaming.
