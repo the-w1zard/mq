@@ -73,9 +73,7 @@ export const OP = {
   EFFECT: 3,
   COMPACT: 4,
 } as const;
-
 export type OpKind = (typeof OP)[keyof typeof OP];
-
 export const LANE_FOR_OP: readonly number[] = [
   0, // READ
   1, // WRITE
@@ -83,9 +81,7 @@ export const LANE_FOR_OP: readonly number[] = [
   3, // EFFECT
   4, // COMPACT
 ];
-
 export type WaitStrategy = "spin" | "yield" | "sleep";
-
 export interface DisruptorOptions {
   /** Must be power of two. */
   capacity?: number;
@@ -97,7 +93,6 @@ export interface DisruptorOptions {
   /** Use SharedArrayBuffer + Atomics. */
   shared?: boolean;
 }
-
 export interface RingStats {
   published: Uint32Array;
   consumed: Uint32Array;
@@ -105,9 +100,7 @@ export interface RingStats {
   batches: Uint32Array;
   maxBatch: Uint32Array;
 }
-
 const isPow2 = (n: number) => n > 0 && (n & (n - 1)) === 0;
-
 export class HADRON_DISRUPTOR {
   readonly capacity: number;
   readonly mask: number;
@@ -185,7 +178,6 @@ export class HADRON_DISRUPTOR {
       maxBatch: new Uint32Array(lanes),
     };
   }
-
   /** Register the handler for one operation lane. */
   onLane(lane: number, handler: (record: Int32Array, base: number, clock: number) => void): this {
     this.handlers[lane] = handler;

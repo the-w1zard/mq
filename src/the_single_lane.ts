@@ -54,7 +54,6 @@ export interface Particle {
     /** Edit fn carried with the particle (OP.EDIT), executed in the pass. */
     edit?: (payload: any) => any;
 }
-
 export interface CallSite<T = any> {
     (value: T, meta: CallSiteMeta): void;
     /** duplex: submit a change straight into the collider's queue */
@@ -66,19 +65,16 @@ export interface CallSite<T = any> {
     unsub(): void;
     readonly pid: Pid;
 }
-
 export interface CallSiteMeta {
     seq: number;        // tracer tick at delivery time
     cycle: number;      // completed cycles seen
     dirty: boolean;     // did this particle change since last delivery?
 }
-
 export interface ColliderOptions {
     maxParticles?: number;      // hard cap; Int32Array sizing
     windowSize?: number;        // send-pass batch window
     tiers?: TransformTier[];    // queued tiered concurrent batches
 }
-
 // ============================================================================
 // TRANSFORMER FACTORY — nothing is done without first being placed into a
 // queue. Queued tiered concurrently executing batches replace the feeding
@@ -94,7 +90,6 @@ export interface TransformTier {
     /** the work */
     run: (particle: Particle) => Promise<unknown> | unknown;
 }
-
 export interface TransformerQueue {
     /** enqueue a particle for the matching tier; returns a drain promise */
     submit(pid: Pid, tierName: string, work?: (p: Particle) => unknown): Promise<unknown>;
@@ -103,10 +98,6 @@ export interface TransformerQueue {
     readonly pending: number;
 }
 // #endregion
-
-// #region █████ PERF FIXES: bitmask compactor / bytecode clock / slot index ██
-
-/** Fix #1 — sparse update: 1-bit-per-particle dirty bitmask + compaction. */
 class DenseRingCompactor {
     readonly dirtyBitmask: Uint32Array;
     readonly activeIndices: Uint32Array;
@@ -135,8 +126,6 @@ class DenseRingCompactor {
         return this.activeCount;
     }
 }
-
-/** Fix #2 — clock: 4-byte bytecode sequence register [OP, EPOCH, STATE, SEQ]. */
 class BytecodeClock {
     readonly register = new Uint8Array(4);
     tick(): void {
@@ -150,8 +139,6 @@ class BytecodeClock {
     get seq(): number { return this.register[3]; }
     get epoch(): number { return this.register[1]; }
 }
-
-/** Fix #3 — pid -> slot: flat Int32Array direct-lookup (no Map, no GC). */
 class DirectSlotIndex {
     readonly pidToSlot: Int32Array;
     constructor(maxParticles: number) {
@@ -162,9 +149,6 @@ class DirectSlotIndex {
     delete(pid: number): void { this.pidToSlot[pid] = -1; }
 }
 // #endregion
-
-// #region █████ TRANSFORMER FACTORY — queued tiered concurrent batches ██████
-
 class TieredTransformer implements TransformerQueue {
     private queues = new Map<string, { pids: Pid[]; resolvers: Array<(v: unknown) => void> }>();
     constructor(private tiers: TransformTier[], private collider: HC4) {

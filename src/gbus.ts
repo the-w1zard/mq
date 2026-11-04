@@ -1,9 +1,7 @@
 // GLOBAL_BUS.ts
-
 type K = string;
 type Off = () => void;
 type Timer = ReturnType<typeof setTimeout>;
-
 export interface Message<P = unknown> {
   id: string;
   r: K;
@@ -15,25 +13,18 @@ export interface Message<P = unknown> {
   ttl?: number;
   _ack: boolean;
 }
-
 export interface Context<P = unknown> {
   msg: Message<P>;
   attempt: number;
   reply(value: unknown): boolean;
 }
-
-export type Handler<P = any> = (
-  payload: P,
-  context: Context<P>
-) => unknown | Promise<unknown>;
-
+export type Handler<P = any> = (  payload: P,  context: Context<P>) => unknown | Promise<unknown>;
 interface Channels {
   channels: Map<K, Set<Handler>>;
   sub_channels: Map<K, Map<K, Set<Handler>>>;
   trip_channels: Map<K, Map<K, Set<Handler>>>;
   quad_channels: Map<K, Map<K, Set<Handler>>>;
 }
-
 interface Delivery {
   handler: Handler;
   acked: boolean;
@@ -41,7 +32,6 @@ interface Delivery {
   attempt: number;
   value?: unknown;
 }
-
 interface Pending {
   msg: Message;
   channels: Channels;
@@ -52,17 +42,14 @@ interface Pending {
   resolve(value: unknown): void;
   reject(error: Error): void;
 }
-
 interface Mesh {
   sequence: number;
   queue: Map<string, Pending>;
   timer?: Timer;
 }
-
 const MESH = Symbol.for("SIG_BUS.GLOBAL_MESH.v1");
 const RETRY_MS = 20_000;
 const ACK_TIMEOUT_MS = 10_000;
-
 function mesh(): Mesh {
   const global = globalThis as any;
 
@@ -70,9 +57,7 @@ function mesh(): Mesh {
     sequence: 0,
     queue: new Map<string, Pending>()
   };
-}
-
-// Your existing globalThis[root] -> master -> slave_CHANNELS layout.
+}// Your existing globalThis[root] -> master -> slave_CHANNELS layout.
 function channels(s: K, m: K, r: K): Channels {
   const global = globalThis as any;
 
@@ -109,7 +94,6 @@ function channels(s: K, m: K, r: K): Channels {
 
   return registry;
 }
-
 function add(
   map: Map<K, Set<Handler>>,
   key: K,
@@ -121,7 +105,6 @@ function add(
 
   set.add(handler);
 }
-
 function addNested(
   map: Map<K, Map<K, Set<Handler>>>,
   first: K,
@@ -134,7 +117,6 @@ function addNested(
 
   add(inner, second, handler);
 }
-
 function remove(
   map: Map<K, Set<Handler>>,
   key: K,
@@ -146,7 +128,6 @@ function remove(
 
   if (set?.size === 0) map.delete(key);
 }
-
 function removeNested(
   map: Map<K, Map<K, Set<Handler>>>,
   first: K,
@@ -161,7 +142,6 @@ function removeNested(
 
   if (!inner.size) map.delete(first);
 }
-
 function matching(pending: Pending): Handler[] {
   const { msg, channels: c } = pending;
 
@@ -179,11 +159,9 @@ function matching(pending: Pending): Handler[] {
     slave.has(handler)
   );
 }
-
 function validReply(value: unknown): boolean {
   return value !== undefined && value !== false;
 }
-
 function complete(state: Mesh, pending: Pending): void {
   const deliveries = pending.deliveries;
 
@@ -204,7 +182,6 @@ function complete(state: Mesh, pending: Pending): void {
 
   pending.resolve(values.length === 1 ? values[0] : values);
 }
-
 function dispatch(state: Mesh, pending: Pending): void {
   if (pending.done) return;
 
@@ -282,7 +259,6 @@ function dispatch(state: Mesh, pending: Pending): void {
       );
   }
 }
-
 function schedule(state: Mesh): void {
   if (state.timer !== undefined) {
     clearTimeout(state.timer);
@@ -302,7 +278,6 @@ function schedule(state: Mesh): void {
     flush(state);
   }, Math.max(0, next - Date.now()));
 }
-
 function flush(state: Mesh): void {
   const now = Date.now();
 
@@ -314,7 +289,6 @@ function flush(state: Mesh): void {
 
   schedule(state);
 }
-
 export class GLOBAL_BUS {
   constructor(
     public readonly sl = "default",
