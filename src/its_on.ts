@@ -151,7 +151,7 @@ const CAPACITY = 65_536 * 4;
 /**             BARE METAL TEST
  First figure is what its highest peak amounted up to.
 
- This is a 'see who crosses the line faster' type of bench. If you testing a slower system, I 
+ This is a 'see who crosses the line faster' type of bench. If your testing a slower system, I 
  would suggest turning these numbers down. If you are running a disruptor doing 350-450 and
  above, I would leave the numbers at 500_000 for batch size and 500 for total batches.
 
@@ -159,50 +159,48 @@ const CAPACITY = 65_536 * 4;
  they really like. Weirdly, it is also one of the more consistant number pairs I came across
  as well, and I played with these numbers... for a long time since I couldn't find any ryme
  or reason as to why they would hit the numbers that they did.
- ------------- POWER_OF_TWO.publish ------------
- Peak                           923.36 M ops/sec
- Average:                       786.40 M ops/sec
- -----------------------------------------------
- ----------- DARTH_REVAN.admitDirect -----------
- Peak                           923.19 M ops/sec
- Average:                       787.83 M ops/sec
- -----------------------------------------------
- ------------- DARTH_VADER.publish -------------
- Peak                          1230.92 M ops/sec
- Average:                       967.84 M ops/sec
- -----------------------------------------------
- ------------- VIOLET_HOOD.publish -------------
- Peak                           875.04 M ops/sec
- Average:                       749.78 M ops/sec
- -----------------------------------------------
- ------------- DARTH_MAUL.publish --------------
- Peak                           738.66 M ops/sec
- Average:                       635.41 M ops/sec
- -----------------------------------------------
- -------------- HADRON_APEX.write --------------
- Peak                           678.70 M ops/sec
- Average:                       569.71 M ops/sec
- -----------------------------------------------
- --------- GOL_THE_WITHER_KING.publish ---------
- Peak                           738.55 M ops/sec
- Average:                       639.58 M ops/sec
- -----------------------------------------------
- ------------ DARTH_CALDOTH.admit --------------
- Peak                           103.93 M ops/sec
- Average:                         6.86 M ops/sec
- -----------------------------------------------
- ----------- DARTH_PLAGUEIS.publish ------------
- Peak                             0.00 M ops/sec
- Average:                         0.00 M ops/sec
- ** Did not run this test as you can see from
- the times post in the other test, it just 
- isnt fast enough for as this is a race to the
- finish line rather than a timed trial.
- -----------------------------------------------
- ------------ DARTH_SIDIOUS.publish ------------
- Peak                            71.27 M ops/sec
- Average:                        62.63 M ops/sec
- -----------------------------------------------
+ --------------------------------------- POWER_OF_TWO.publish --------------------------------------
+ Peak                                     923.36 M ops/sec (2.032 billion ops/sec different machine)
+ Average:                                                                           786.40 M ops/sec
+ ---------------------------------------------------------------------------------------------------
+ ------------------------------------- DARTH_REVAN.admitDirect -------------------------------------
+ Peak                                                                               923.19 M ops/sec
+ Average:                                                                           787.83 M ops/sec
+ ---------------------------------------------------------------------------------------------------
+ --------------------------------------- DARTH_VADER.publish ---------------------------------------
+ Peak                                    1230.92 M ops/sec (2.016 billion ops/sec different machine)
+ Average:                                                                           967.84 M ops/sec
+ ---------------------------------------------------------------------------------------------------
+ --------------------------------------- VIOLET_HOOD.publish ---------------------------------------
+ Peak                                                                               875.04 M ops/sec
+ Average:                                                                           749.78 M ops/sec
+ ---------------------------------------------------------------------------------------------------
+ --------------------------------------- DARTH_MAUL.publish ----------------------------------------
+ Peak                                                                               738.66 M ops/sec
+ Average:                                                                           635.41 M ops/sec
+ ---------------------------------------------------------------------------------------------------
+ ---------------------------------------- HADRON_APEX.write ----------------------------------------
+ Peak                                                                               678.70 M ops/sec
+ Average:                                                                           569.71 M ops/sec
+ ---------------------------------------------------------------------------------------------------
+ ----------------------------------- GOL_THE_WITHER_KING.publish -----------------------------------
+ Peak                                                                               738.55 M ops/sec
+ Average:                                                                           639.58 M ops/sec
+ ---------------------------------------------------------------------------------------------------
+ --------------------------------------- DARTH_CALDOTH.admit ---------------------------------------
+ Peak                                                                               103.93 M ops/sec
+ Average:                                                                             6.86 M ops/sec
+ ---------------------------------------------------------------------------------------------------
+ ------------------------------------- DARTH_PLAGUEIS.publish --------------------------------------
+ Peak                                                                                 0.00 M ops/sec
+ Average:                                                                             0.00 M ops/sec
+ ** Did not run this test as you can see from the times post in the other test, it just 
+ isnt fast enough for as this is a race to the finish line rather than a timed trial.
+ ---------------------------------------------------------------------------------------------------
+ -------------------------------------- DARTH_SIDIOUS.publish --------------------------------------
+ Peak                                                                                71.27 M ops/sec
+ Average:                                                                            62.63 M ops/sec
+ ---------------------------------------------------------------------------------------------------
 */
 
 const RUN_BARE_METAL_CPU_TEST = true;
@@ -242,11 +240,12 @@ type fighter =
 	 Average:               967.84 M ops/sec
 	 At a capacity of 131_072, power of two actually did worse at that capacity.
 
-	 The jump is probably due to a combination of l1, faster memory, and a newer cpu. If your rocking a 
-	 turn of the year custom built, water cooled pc... your numbers will be higher, I am curious to how
-	 much higher because personally... I could never justify buying something like that... Buying higher
-	 tier, last gen parts... have always been the path I go. It lasts... 8 yrs+ at a fraction of the cost
-	 while running everything at max... but then when it comes to tests like these... obviously it shows.
+	 The jump is probably due to a combination of l1, memory, and the cpu, all of which were newer and 
+	 clocking higher. If your rocking a turn of the year custom built, water cooled pc... your numbers 
+	 will be higher, I am curious to how much higher because personally... 
+	 I could never justify buying something like that... Buying higher tier, last gen parts... have 
+	 always been the path I go. It lasts... 8 yrs+ at a fraction of the cost while running everything 
+	 at max... but then when it comes to tests like these... obviously it shows.
 
 	 One last thing... FOR MY MACHINE anyways, it seems 1230.92 is its ceiling. Vader got that 6 times 
 	 and I've never seen a disruptor do that over that many tests. Either thats the ceiling for my node
