@@ -34,6 +34,7 @@
   "dependencies": {
     "@the-w1zard/alias_types": "^1.0.2",
     "@the-w1zard/dx": "^1.0.7",
-    "@the-w1zard/types": "^1.0.1"
+    "@the-w1zard/types": "^1.0.1",
+    "@types/bun": "^1.4.4"
   }
 }

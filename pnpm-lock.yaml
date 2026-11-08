@@ -17,6 +17,9 @@ importers:
       '@the-w1zard/types':
         specifier: ^1.0.1
         version: 1.0.1
+      '@types/bun':
+        specifier: ^1.4.4
+        version: 1.4.4
     devDependencies:
       '@tsconfig/node-lts':
         specifier: ^24.0.0
@@ -50,8 +53,14 @@ packages:
   '@tsconfig/node-lts@24.0.1':
     resolution: {integrity: sha512-xo+1KtV5zVb90fyyeglG1n5cqg3cQXLlCkEpLptYlZUNk28xmwhuD5GmxoXwmrVtUTvaMyclun9kAd0TK7H+Pg==}
 
+  '@types/bun@1.4.4':
+    resolution: {integrity: sha512-9wkRDXUXK124pEnAutE6n/l18j+i9GC5IAHK8TmX/2nlySETmky0OU6yL5U8pW1AoKh++AN9auDCr647BfurjQ==}
+
   '@types/node@24.19.2':
     resolution: {integrity: sha512-93d49wCWJkCyN87MxLpNN6KXPCwFw7bVUg79mGUV1OS40JGWwVCr8n61DXCSqz7CV6/VfPkb7xec7uP2M+QHWQ==}
+
+  bun-types@1.4.4:
+    resolution: {integrity: sha512-yjrJh5oGX7mMPKGd19YXyIjmEuj4G4zNC30bs7PM9Az7NQ3ndF3j6hbeRdvJTRQEhJ/FYQwW0a2moweEi2hMxQ==}
 
   typescript@6.0.3:
     resolution: {integrity: sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==}
@@ -79,8 +88,17 @@ snapshots:
 
   '@tsconfig/node-lts@24.0.1': {}
 
+  '@types/bun@1.4.4':
+    dependencies:
+      bun-types: 1.4.4
+
   '@types/node@24.19.2':
     dependencies:
+      undici-types: 7.24.6
+
+  bun-types@1.4.4:
+    dependencies:
+      '@types/node': 24.19.2
       undici-types: 7.24.6
 
   typescript@6.0.3: {}

@@ -907,15 +907,12 @@ export const MAX_PID = 0xffffff;
 export class DARTH_VADER {
 	public readonly capacity: number;
 	public readonly mask: number;
-
 	// Structure-of-arrays lanes. meta = (pid << 8) | flag
 	public readonly meta: Int32Array;
 	public readonly values: Float64Array;
-
 	// Next slot to write (always masked) and number of free slots (0..capacity).
 	private head = 0;
 	private free: number;
-
 	constructor(capacity = 65536) {
 		if (!Number.isInteger(capacity) || capacity < 2 || capacity > 1 << 30 || (capacity & (capacity - 1)) !== 0) {
 			throw new Error("Disruptor capacity must be a power of two between 2 and 2^30.");
@@ -925,9 +922,7 @@ export class DARTH_VADER {
 		this.free = capacity;
 		this.meta = new Int32Array(capacity);
 		this.values = new Float64Array(capacity);
-	}
-
-	/** Publish one event. Returns false (and writes nothing) if the ring is full. */
+	}/** Publish one event. Returns false (and writes nothing) if the ring is full. */
 	public publish(pid: number, value: number, flag = 0): boolean {
 		const f = this.free;
 		if (f === 0) {
@@ -940,7 +935,6 @@ export class DARTH_VADER {
 		this.free = f - 1;
 		return true;
 	}
-
 	/** Drain everything currently published, calling handler per event. Returns the count. */
 	public consume(handler: DisruptorHandler): number {
 		const n = this.capacity - this.free;
@@ -959,35 +953,25 @@ export class DARTH_VADER {
 		this.free = this.capacity;
 		return n;
 	}
-
 	// ── Zero-callback batch path ──────────────────────────────────────────
 	//   const n = ring.readable();
 	//   for (let k = 0, i = ring.tail(); k < n; k++, i = (i + 1) & ring.mask) {
 	//     const m = ring.meta[i]; use(m >>> 8, ring.values[i], m & 255);
 	//   }
 	//   ring.advance(n);
-
 	/** Number of events published and not yet consumed. */
 	public readable(): number {
 		return this.capacity - this.free;
-	}
-
-	/** Lane index of the oldest unconsumed event (only meaningful when readable() > 0). */
+	}/** Lane index of the oldest unconsumed event (only meaningful when readable() > 0). */
 	public tail(): number {
 		return (this.head - (this.capacity - this.free)) & this.mask;
-	}
-
-	/** Mark `n` events (n <= readable()) as consumed after reading them straight from the lanes. */
+	}/** Mark `n` events (n <= readable()) as consumed after reading them straight from the lanes. */
 	public advance(n: number): void {
 		this.free += n;
-	}
-
-	/** Free slots remaining. */
+	}/** Free slots remaining. */
 	public remaining(): number {
 		return this.free;
-	}
-
-	/** Empties the ring. Lanes are not zeroed: stale slots are never readable. */
+	}/** Empties the ring. Lanes are not zeroed: stale slots are never readable. */
 	public reset(): void {
 		this.head = 0;
 		this.free = this.capacity;

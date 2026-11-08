@@ -2,19 +2,18 @@
 <div align="left" style="position: relative;">
 <img src="./icons/gandalf.png" align="right" width="30%" style="margin: -20px 0 0 20px;">
 
-<h3>Message Queues & Disruptors: <span style="font-size:18px;" >The Wizard's Arsenal</span></h3>
+<h3 style="font-size:26px;">Message Queues, Buses & Disruptors: <span style="font-size:16px;" >Need a disruptor bruh?!</span></h3>
 
-<p align="left"><em>Because CLEARLY... fuck, you can never just have TOO many disruptors.</em></p>
-<p align="left"><em>For example, what happens when... your DISRUPTOR NEEDS... ANOTHER disruptor ontop of it?... just saying, it does happen you know...</em></p>
+
 <p align="left"><em>The most opinionated platform... ever.</em></p>
 <p align="left"><em>Trust me... I'm a fucking wizard... 🧙</em></p>
-<p align="left">DISRUPTOR STATS:</p>
-<p align="left"><em>PFFT... wasn't going to let this oppurtunity go to waste....</em></p>
-<p align="left"><em>All disruptors currently only running single core... not to mention, these things just run on front end applications.</em></p>
+<p align="left">Platforms stats:</p>
 <p align="left">
-<img src="https://img.shields.io/badge/[POWER OF 2]- 894 MILL OP/SEC-95ED27?style=flat">
-<img src="https://img.shields.io/badge/[SITH]- 951 MILL OP/SEC-95ED27?style=flat">
-<img src="https://img.shields.io/badge/[VENTREX]- 752 MILL OPS/SEC !ON USER USAGE PATH!-95ED27?style=flat">
+<img src="https://img.shields.io/badge/LINES OF CODE- 10,300,000-95ED27?style=flat">
+<img src="https://img.shields.io/badge/FEATURES- UNKNOWN-95ED27?style=flat">
+<img src="https://img.shields.io/badge/REACTS RULES ON HOOKS- 0-95ED27?style=flat">
+<img src="https://img.shields.io/badge/DISRUPTORS- 18+-95ED27?style=flat">
+<img src="https://img.shields.io/badge/MESSAGE QUEUES- 5-95ED27?style=flat">
 </p>
 <p align="left">VSCode ext:</p>
 <p align="left">
@@ -28,19 +27,20 @@
 <p align="left">Small but powerful repos worth checking out:</p>
 <p align="left">
 
-<a href="https://github.com/the-w1zard/app_store"><img src="https://img.shields.io/badge/Store / Maelstrom-000000.svg?style=flat&logo=JetBrains&logoColor=white" alt="JetBrains"></a>
-<a href="https://github.com/the-w1zard/dx"><img src="https://img.shields.io/badge/UX /DX-34A853.svg?style=flat&logo=Android&logoColor=white" alt="Android"></a>
-<a href="https://github.com/the-w1zard/temporal_shift"><img src="https://img.shields.io/badge/Temporal Shift-77AA99.svg?style=flat&logo=Org&logoColor=white" alt="Org"></a>
-<a href="https://github.com/the-w1zard/the_cloud"><img src="https://img.shields.io/badge/The Cloud-02303A.svg?style=flat&logo=Gradle&logoColor=white" alt="Gradle"></a>
-<a href="https://github.com/the-w1zard/signals"><img src="https://img.shields.io/badge/Signals-02303A.svg?style=flat&logo=Gradle&logoColor=white" alt="Gradle"></a>
-<img src="https://img.shields.io/badge/Sometimes, my genius... It generates gravity.-4285F4.svg?style=flat&logo=🧙&logoColor=white" alt="Google">
-<a href="https://github.com/the-w1zard"><img src="https://img.shields.io/badge/Coming Soon: The Wizard Platform-7F52FF.svg?style=flat&logo=Kotlin&logoColor=white" alt="Kotlin"></a>
-<a href="https://github.com/the-w1zard"><img src="https://img.shields.io/badge/Coming Soon: Hadron Particle Disruptor-%23ED8B00.svg?style=flat&logo=openjdk&logoColor=white" alt="java"></a>
+- [![🧙 Alias Types](https://img.shields.io/badge/Alias%20Types-000000.svg?style=flat&logo=typescript&logoColor=white)](https://github.com/the-w1zard/alias_types) <a href="https://www.npmjs.com/package/@the-w1zard/alias_types"><img src="./icons/npm.png" alt="alias_types" width="20" height="20"></a>
+- [![🧙 The Cloud](https://img.shields.io/badge/%F0%9F%A7%99%20App%20Store-000000.svg?style=flat)](https://github.com/the-w1zard/app_store)  <a href="https://www.npmjs.com/package/@the-w1zard/store"><img src="./icons/npm.png" alt="app_store" width="20" height="20"></a>
+- [![🧙 The Cloud](https://img.shields.io/badge/%F0%9F%A7%99%20DX-95ED27.svg?style=flat)](https://github.com/the-w1zard/dx) <a href="https://www.npmjs.com/package/@the-w1zard/dx"><img src="./icons/npm.png" alt="dx" width="20" height="20"></a>
+- [![🧙 The Cloud](https://img.shields.io/badge/%F0%9F%A7%99%20Temporal%20Shift-77AA99.svg?style=flat)](https://github.com/the-w1zard/temporal_shift) <a href="https://www.npmjs.com/package/@the-w1zard/temporal_shift"><img src="./icons/npm.png" alt="temporal_shift" width="20" height="20"></a>
+- [![🧙 The Cloud](https://img.shields.io/badge/%F0%9F%A7%99%20The%20Cloud-02303A.svg?style=flat)](https://github.com/the-w1zard/the_cloud)  <a href="https://www.npmjs.com/package/@the-w1zard/the-cloud"><img src="./icons/npm.png" alt="app_store" width="20" height="20"></a>
+- [![🧙 SINGULARITY](https://img.shields.io/badge/%F0%9F%A7%99%20SINGULARITY-02303A.svg?style=flat)](https://github.com/the-w1zard)  
+- [![🧙 Sometimes,%20my%20genius...%20It%20generates%20gravity.](https://img.shields.io/badge/%F0%9F%A7%99%20Sometimes,%20my%20genius...%20It%20generates%20gravity.-4285F4.svg?style=flat)](https://github.com/the-w1zard)  
+- [![🧙 The Wizard](https://img.shields.io/badge/%F0%9F%A7%99%20Coming%20Soon:%20The%20Wizard%20Ed.-7F52FF.svg?style=flat)](https://github.com/the-w1zard)  
+- [![🧙 Hadron Particle Disruptor](https://img.shields.io/badge/%F0%9F%A7%99%20Coming%20Soon:%20Hadron%20Particle%20Disruptor-23ED8B00.svg?style=flat)](https://github.com/the-w1zard)  
 </p>
 <p align="left">The goal? To remove all friction, from everything.</p>
-
 </div>
 <br clear="right">
+
 
 > [!NOTE]
 > 
@@ -63,11 +63,27 @@
 > The only reason I haven't done it yet, is purely because of the cost in performance in doing so. One high performing disruptor, I wouldn't even bother... because thats just luck... But with the amount I have, as I seem to be collecting an arsenal of them, AND with how they actually push v8 as hard as they do... there is A LOT of performance left on the table to pay for the cost of going to multi core. Not to mention, its fucking front end... LOL... One thing that's curious... everyone else seems to be stuck at that 4 million mark... ** shrugs **
 
 
+> The file 'its_on.ts' has 20 or so disruptors already hooked up to a bench where you can dial the batch size, total batches capacity and more. 
+>
+> There is two tests to choose from just by changing the boolean at RUNE_BARE_METAL_CPU_TEST, and then under fight you can change which disruptor the actual test runs for.
 ---
 
 A collection of high-performance execution primitives for event processing, message delivery, reactive state, shared-memory coordination, and streaming.
 
 The module brings together several Disruptor implementations, message queues, event emitters, stream relays, and Server-Sent Events infrastructure.
+
+> [!IMPORTANT]
+>
+> Uhmmmm... Just finished building out the new signals solution, where some rediculous builds were created for it. I don't currently have the time to go over each of them right now, I am still placing them within the repo, because truly they are interesting and I would like to keep them... maybe at a later I might need to reference them or something. But they are def worth a look at considering the numbers they were pumping out on the benches. 
+>
+> This new set of disruptors, aren't your typicaly run of the mill variants. These were built to converge signals with a disruptor, smashing... and I mean smashing preact and alien in performance. Sooooo... they aren't something to scoff at and are worth a serious look at.
+>
+> I'll leave the benches in the files, and the in the same folder it does come with a fully working version of both preact and alien to test against.
+>
+> I even got a... disruptor where I converted the triple nested maps... to actually work, HAVENT BENCHED that one yet... who knows, it might be complete fucking garbage, haha. Because I am truly shocked... on how optmized, javascript has map with the v8 engine... like its basically, a disruptor all on its own, actually. If you test map, using just integers... pffft map that fucking thing is fast as fuck. If I remember correctly, I only had... one single map re-imagined solution of mine actually beat it, while map already does like 400 mill ops a sec. Like that thing is fucking fast, if my implemenation was anything less than what it pulled which was a sloppy 2x, if it wasn't for the fact that, THAT VALUE translates to 800 mill... I would have just deleted mine.
+>
+> These things are within the 'alts' folder.
+
 
 ---
 
