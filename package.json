@@ -1,6 +1,6 @@
 {
   "name": "@the-w1zard/mq",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "sideEffects": false,
   "type": "module",
   "main": "./dist/index.js",
